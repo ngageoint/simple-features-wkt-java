@@ -21,7 +21,10 @@ View the latest [Javadoc](http://ngageoint.github.io/simple-features-wkt-java/do
 
 ```java
 
-// TODO
+// String text = ...
+
+Geometry geometry = GeometryReader.readGeometry(text);
+GeometryType geometryType = geometry.getGeometryType();
 
 ```
 
@@ -29,7 +32,9 @@ View the latest [Javadoc](http://ngageoint.github.io/simple-features-wkt-java/do
 
 ```java
 
-// TODO
+// Geometry geometry = ...
+
+String text = GeometryWriter.writeGeometry(geometry);
 
 ```
 
