@@ -82,7 +82,7 @@ public class ReadmeTest {
 	 * 
 	 * @param geometry
 	 *            geometry
-	 * @return bytes
+	 * @return text
 	 * @throws IOException
 	 *             upon error
 	 */
