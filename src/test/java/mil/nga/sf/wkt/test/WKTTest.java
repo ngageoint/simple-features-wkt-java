@@ -805,6 +805,9 @@ public class WKTTest {
 
 		String text = GeometryWriter.writeGeometry(geometry);
 
+		Geometry geometry2 = GeometryReader.readGeometry(text);
+		WKTTestUtils.compareGeometries(geometry, geometry2);
+
 		testFiniteFilter(text, new PointFiniteFilter());
 		testFiniteFilter(text, new PointFiniteFilter(true));
 		testFiniteFilter(text, new PointFiniteFilter(false, true));

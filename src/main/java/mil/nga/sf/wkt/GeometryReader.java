@@ -95,53 +95,91 @@ public class GeometryReader {
 	 */
 	public static <T extends Geometry> T readGeometry(String text,
 			GeometryFilter filter, Class<T> expectedType) throws IOException {
-
 		T geometry = null;
-
-		TextReader reader = new TextReader(text);
+		GeometryReader reader = new GeometryReader(text);
 		try {
-			geometry = readGeometry(reader, filter, expectedType);
+			geometry = reader.read(filter, expectedType);
 		} finally {
 			reader.close();
 		}
-
 		return geometry;
 	}
 
 	/**
-	 * Read a geometry from the well-known text
+	 * Text Reader
+	 */
+	private TextReader reader;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param text
+	 *            well-known text
+	 * @since 1.0.1
+	 */
+	public GeometryReader(String text) {
+		this(new TextReader(text));
+	}
+
+	/**
+	 * Constructor
 	 * 
 	 * @param reader
 	 *            text reader
-	 * @return geometry
-	 * @throws IOException
-	 *             upon failure to read
+	 * @since 1.0.1
 	 */
-	public static Geometry readGeometry(TextReader reader) throws IOException {
-		return readGeometry(reader, null, null);
+	public GeometryReader(TextReader reader) {
+		this.reader = reader;
+	}
+
+	/**
+	 * Get the text reader
+	 * 
+	 * @return text reader
+	 * @since 1.0.1
+	 */
+	public TextReader getTextReader() {
+		return reader;
+	}
+
+	/**
+	 * Close the text reader
+	 * 
+	 * @since 1.0.1
+	 */
+	public void close() {
+		reader.close();
 	}
 
 	/**
 	 * Read a geometry from the well-known text
 	 * 
-	 * @param reader
-	 *            text reader
+	 * @return geometry
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public Geometry read() throws IOException {
+		return read(null, null);
+	}
+
+	/**
+	 * Read a geometry from the well-known text
+	 * 
 	 * @param filter
 	 *            geometry filter
 	 * @return geometry
 	 * @throws IOException
 	 *             upon failure to read
+	 * @since 1.0.1
 	 */
-	public static Geometry readGeometry(TextReader reader,
-			GeometryFilter filter) throws IOException {
-		return readGeometry(reader, filter, null);
+	public Geometry read(GeometryFilter filter) throws IOException {
+		return read(filter, null);
 	}
 
 	/**
 	 * Read a geometry from the well-known text
 	 * 
-	 * @param reader
-	 *            text reader
 	 * @param expectedType
 	 *            expected type
 	 * @param <T>
@@ -149,37 +187,35 @@ public class GeometryReader {
 	 * @return geometry
 	 * @throws IOException
 	 *             upon failure to read
+	 * @since 1.0.1
 	 */
-	public static <T extends Geometry> T readGeometry(TextReader reader,
+	public <T extends Geometry> T read(Class<T> expectedType)
+			throws IOException {
+		return read(null, expectedType);
+	}
+
+	/**
+	 * Read a geometry from the well-known text
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param expectedType
+	 *            expected type
+	 * @param <T>
+	 *            geometry type
+	 * @return geometry
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public <T extends Geometry> T read(GeometryFilter filter,
 			Class<T> expectedType) throws IOException {
-		return readGeometry(reader, null, expectedType);
+		return read(filter, null, expectedType);
 	}
 
 	/**
 	 * Read a geometry from the well-known text
 	 * 
-	 * @param reader
-	 *            text reader
-	 * @param filter
-	 *            geometry filter
-	 * @param expectedType
-	 *            expected type
-	 * @param <T>
-	 *            geometry type
-	 * @return geometry
-	 * @throws IOException
-	 *             upon failure to read
-	 */
-	public static <T extends Geometry> T readGeometry(TextReader reader,
-			GeometryFilter filter, Class<T> expectedType) throws IOException {
-		return readGeometry(reader, filter, null, expectedType);
-	}
-
-	/**
-	 * Read a geometry from the well-known text
-	 * 
-	 * @param reader
-	 *            text reader
 	 * @param filter
 	 *            geometry filter
 	 * @param containingType
@@ -191,15 +227,16 @@ public class GeometryReader {
 	 * @return geometry
 	 * @throws IOException
 	 *             upon failure to read
+	 * @since 1.0.1
 	 */
-	public static <T extends Geometry> T readGeometry(TextReader reader,
-			GeometryFilter filter, GeometryType containingType,
-			Class<T> expectedType) throws IOException {
+	public <T extends Geometry> T read(GeometryFilter filter,
+			GeometryType containingType, Class<T> expectedType)
+			throws IOException {
 
 		Geometry geometry = null;
 
 		// Read the geometry type
-		GeometryTypeInfo geometryTypeInfo = readGeometryType(reader);
+		GeometryTypeInfo geometryTypeInfo = readGeometryType();
 
 		if (geometryTypeInfo != null) {
 
@@ -213,40 +250,40 @@ public class GeometryReader {
 				throw new SFException("Unexpected Geometry Type of "
 						+ geometryType.name() + " which is abstract");
 			case POINT:
-				geometry = readPointText(reader, hasZ, hasM);
+				geometry = readPointText(hasZ, hasM);
 				break;
 			case LINESTRING:
-				geometry = readLineString(reader, filter, hasZ, hasM);
+				geometry = readLineString(filter, hasZ, hasM);
 				break;
 			case POLYGON:
-				geometry = readPolygon(reader, filter, hasZ, hasM);
+				geometry = readPolygon(filter, hasZ, hasM);
 				break;
 			case MULTIPOINT:
-				geometry = readMultiPoint(reader, filter, hasZ, hasM);
+				geometry = readMultiPoint(filter, hasZ, hasM);
 				break;
 			case MULTILINESTRING:
-				geometry = readMultiLineString(reader, filter, hasZ, hasM);
+				geometry = readMultiLineString(filter, hasZ, hasM);
 				break;
 			case MULTIPOLYGON:
-				geometry = readMultiPolygon(reader, filter, hasZ, hasM);
+				geometry = readMultiPolygon(filter, hasZ, hasM);
 				break;
 			case GEOMETRYCOLLECTION:
-				geometry = readGeometryCollection(reader, filter, hasZ, hasM);
+				geometry = readGeometryCollection(filter, hasZ, hasM);
 				break;
 			case MULTICURVE:
-				geometry = readMultiCurve(reader, filter, hasZ, hasM);
+				geometry = readMultiCurve(filter, hasZ, hasM);
 				break;
 			case MULTISURFACE:
-				geometry = readMultiSurface(reader, filter, hasZ, hasM);
+				geometry = readMultiSurface(filter, hasZ, hasM);
 				break;
 			case CIRCULARSTRING:
-				geometry = readCircularString(reader, filter, hasZ, hasM);
+				geometry = readCircularString(filter, hasZ, hasM);
 				break;
 			case COMPOUNDCURVE:
-				geometry = readCompoundCurve(reader, filter, hasZ, hasM);
+				geometry = readCompoundCurve(filter, hasZ, hasM);
 				break;
 			case CURVEPOLYGON:
-				geometry = readCurvePolygon(reader, filter, hasZ, hasM);
+				geometry = readCurvePolygon(filter, hasZ, hasM);
 				break;
 			case CURVE:
 				throw new SFException("Unexpected Geometry Type of "
@@ -255,13 +292,13 @@ public class GeometryReader {
 				throw new SFException("Unexpected Geometry Type of "
 						+ geometryType.name() + " which is abstract");
 			case POLYHEDRALSURFACE:
-				geometry = readPolyhedralSurface(reader, filter, hasZ, hasM);
+				geometry = readPolyhedralSurface(filter, hasZ, hasM);
 				break;
 			case TIN:
-				geometry = readTIN(reader, filter, hasZ, hasM);
+				geometry = readTIN(filter, hasZ, hasM);
 				break;
 			case TRIANGLE:
-				geometry = readTriangle(reader, filter, hasZ, hasM);
+				geometry = readTriangle(filter, hasZ, hasM);
 				break;
 			default:
 				throw new SFException(
@@ -291,14 +328,12 @@ public class GeometryReader {
 	/**
 	 * Read the geometry type info
 	 * 
-	 * @param reader
-	 *            text reader
 	 * @return geometry type info
 	 * @throws IOException
 	 *             upon failure to read
+	 * @since 1.0.1
 	 */
-	public static GeometryTypeInfo readGeometryType(TextReader reader)
-			throws IOException {
+	public GeometryTypeInfo readGeometryType() throws IOException {
 
 		GeometryTypeInfo geometryInfo = null;
 
@@ -398,8 +433,6 @@ public class GeometryReader {
 	/**
 	 * Read a Point
 	 * 
-	 * @param reader
-	 *            text reader
 	 * @param hasZ
 	 *            has z flag
 	 * @param hasM
@@ -407,14 +440,14 @@ public class GeometryReader {
 	 * @return point
 	 * @throws IOException
 	 *             upon failure to read
+	 * @since 1.0.1
 	 */
-	public static Point readPointText(TextReader reader, boolean hasZ,
-			boolean hasM) throws IOException {
+	public Point readPointText(boolean hasZ, boolean hasM) throws IOException {
 
 		Point point = null;
 
 		if (leftParenthesisOrEmpty(reader)) {
-			point = readPoint(reader, hasZ, hasM);
+			point = readPoint(hasZ, hasM);
 			rightParenthesis(reader);
 		}
 
@@ -424,8 +457,6 @@ public class GeometryReader {
 	/**
 	 * Read a Point
 	 * 
-	 * @param reader
-	 *            text reader
 	 * @param hasZ
 	 *            has z flag
 	 * @param hasM
@@ -433,9 +464,9 @@ public class GeometryReader {
 	 * @return point
 	 * @throws IOException
 	 *             upon failure to read
+	 * @since 1.0.1
 	 */
-	public static Point readPoint(TextReader reader, boolean hasZ, boolean hasM)
-			throws IOException {
+	public Point readPoint(boolean hasZ, boolean hasM) throws IOException {
 
 		double x = reader.readDouble();
 		double y = reader.readDouble();
@@ -468,6 +499,896 @@ public class GeometryReader {
 	/**
 	 * Read a Line String
 	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return line string
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public LineString readLineString(boolean hasZ, boolean hasM)
+			throws IOException {
+		GeometryFilter filter = null;
+		return readLineString(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Line String
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return line string
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public LineString readLineString(GeometryFilter filter, boolean hasZ,
+			boolean hasM) throws IOException {
+
+		LineString lineString = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			lineString = new LineString(hasZ, hasM);
+
+			do {
+				Point point = readPoint(hasZ, hasM);
+				if (filter(filter, GeometryType.LINESTRING, point)) {
+					lineString.addPoint(point);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return lineString;
+	}
+
+	/**
+	 * Read a Polygon
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return polygon
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public Polygon readPolygon(boolean hasZ, boolean hasM) throws IOException {
+		GeometryFilter filter = null;
+		return readPolygon(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Polygon
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return polygon
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public Polygon readPolygon(GeometryFilter filter, boolean hasZ,
+			boolean hasM) throws IOException {
+
+		Polygon polygon = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			polygon = new Polygon(hasZ, hasM);
+
+			do {
+				LineString ring = readLineString(filter, hasZ, hasM);
+				if (filter(filter, GeometryType.POLYGON, ring)) {
+					polygon.addRing(ring);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return polygon;
+	}
+
+	/**
+	 * Read a Multi Point
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return multi point
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public MultiPoint readMultiPoint(boolean hasZ, boolean hasM)
+			throws IOException {
+		GeometryFilter filter = null;
+		return readMultiPoint(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Multi Point
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return multi point
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public MultiPoint readMultiPoint(GeometryFilter filter, boolean hasZ,
+			boolean hasM) throws IOException {
+
+		MultiPoint multiPoint = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			multiPoint = new MultiPoint(hasZ, hasM);
+
+			do {
+				Point point = null;
+				if (isLeftParenthesisOrEmpty(reader)) {
+					point = readPointText(hasZ, hasM);
+				} else {
+					point = readPoint(hasZ, hasM);
+				}
+				if (filter(filter, GeometryType.MULTIPOINT, point)) {
+					multiPoint.addPoint(point);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return multiPoint;
+	}
+
+	/**
+	 * Read a Multi Line String
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return multi line string
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public MultiLineString readMultiLineString(boolean hasZ, boolean hasM)
+			throws IOException {
+		GeometryFilter filter = null;
+		return readMultiLineString(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Multi Line String
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return multi line string
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public MultiLineString readMultiLineString(GeometryFilter filter,
+			boolean hasZ, boolean hasM) throws IOException {
+
+		MultiLineString multiLineString = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			multiLineString = new MultiLineString(hasZ, hasM);
+
+			do {
+				LineString lineString = readLineString(filter, hasZ, hasM);
+				if (filter(filter, GeometryType.MULTILINESTRING, lineString)) {
+					multiLineString.addLineString(lineString);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return multiLineString;
+	}
+
+	/**
+	 * Read a Multi Polygon
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return multi polygon
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public MultiPolygon readMultiPolygon(boolean hasZ, boolean hasM)
+			throws IOException {
+		GeometryFilter filter = null;
+		return readMultiPolygon(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Multi Polygon
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return multi polygon
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public MultiPolygon readMultiPolygon(GeometryFilter filter, boolean hasZ,
+			boolean hasM) throws IOException {
+
+		MultiPolygon multiPolygon = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			multiPolygon = new MultiPolygon(hasZ, hasM);
+
+			do {
+				Polygon polygon = readPolygon(filter, hasZ, hasM);
+				if (filter(filter, GeometryType.MULTIPOLYGON, polygon)) {
+					multiPolygon.addPolygon(polygon);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return multiPolygon;
+	}
+
+	/**
+	 * Read a Geometry Collection
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return geometry collection
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public GeometryCollection<Geometry> readGeometryCollection(boolean hasZ,
+			boolean hasM) throws IOException {
+		GeometryFilter filter = null;
+		return readGeometryCollection(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Geometry Collection
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return geometry collection
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public GeometryCollection<Geometry> readGeometryCollection(
+			GeometryFilter filter, boolean hasZ, boolean hasM)
+			throws IOException {
+
+		GeometryCollection<Geometry> geometryCollection = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			geometryCollection = new GeometryCollection<Geometry>(hasZ, hasM);
+
+			do {
+				Geometry geometry = read(filter,
+						GeometryType.GEOMETRYCOLLECTION, Geometry.class);
+				if (geometry != null) {
+					geometryCollection.addGeometry(geometry);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return geometryCollection;
+	}
+
+	/**
+	 * Read a Multi Curve
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return multi curve
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public GeometryCollection<Curve> readMultiCurve(GeometryFilter filter,
+			boolean hasZ, boolean hasM) throws IOException {
+
+		GeometryCollection<Curve> multiCurve = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			multiCurve = new GeometryCollection<Curve>(hasZ, hasM);
+
+			do {
+				Curve curve = null;
+				if (isLeftParenthesisOrEmpty(reader)) {
+					curve = readLineString(filter, hasZ, hasM);
+					if (!filter(filter, GeometryType.MULTICURVE, curve)) {
+						curve = null;
+					}
+				} else {
+					curve = read(filter, GeometryType.MULTICURVE, Curve.class);
+				}
+				if (curve != null) {
+					multiCurve.addGeometry(curve);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return multiCurve;
+	}
+
+	/**
+	 * Read a Multi Surface
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return multi surface
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public GeometryCollection<Surface> readMultiSurface(GeometryFilter filter,
+			boolean hasZ, boolean hasM) throws IOException {
+
+		GeometryCollection<Surface> multiSurface = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			multiSurface = new GeometryCollection<Surface>(hasZ, hasM);
+
+			do {
+				Surface surface = null;
+				if (isLeftParenthesisOrEmpty(reader)) {
+					surface = readPolygon(filter, hasZ, hasM);
+					if (!filter(filter, GeometryType.MULTISURFACE, surface)) {
+						surface = null;
+					}
+				} else {
+					surface = read(filter, GeometryType.MULTISURFACE,
+							Surface.class);
+				}
+				if (surface != null) {
+					multiSurface.addGeometry(surface);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return multiSurface;
+	}
+
+	/**
+	 * Read a Circular String
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return circular string
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public CircularString readCircularString(boolean hasZ, boolean hasM)
+			throws IOException {
+		GeometryFilter filter = null;
+		return readCircularString(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Circular String
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return circular string
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public CircularString readCircularString(GeometryFilter filter,
+			boolean hasZ, boolean hasM) throws IOException {
+
+		CircularString circularString = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			circularString = new CircularString(hasZ, hasM);
+
+			do {
+				Point point = readPoint(hasZ, hasM);
+				if (filter(filter, GeometryType.CIRCULARSTRING, point)) {
+					circularString.addPoint(point);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return circularString;
+	}
+
+	/**
+	 * Read a Compound Curve
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return compound curve
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public CompoundCurve readCompoundCurve(boolean hasZ, boolean hasM)
+			throws IOException {
+		GeometryFilter filter = null;
+		return readCompoundCurve(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Compound Curve
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return compound curve
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public CompoundCurve readCompoundCurve(GeometryFilter filter, boolean hasZ,
+			boolean hasM) throws IOException {
+
+		CompoundCurve compoundCurve = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			compoundCurve = new CompoundCurve(hasZ, hasM);
+
+			do {
+				LineString lineString = null;
+				if (isLeftParenthesisOrEmpty(reader)) {
+					lineString = readLineString(filter, hasZ, hasM);
+					if (!filter(filter, GeometryType.COMPOUNDCURVE,
+							lineString)) {
+						lineString = null;
+					}
+				} else {
+					lineString = read(filter, GeometryType.COMPOUNDCURVE,
+							LineString.class);
+				}
+				if (lineString != null) {
+					compoundCurve.addLineString(lineString);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return compoundCurve;
+	}
+
+	/**
+	 * Read a Curve Polygon
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return curve polygon
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public CurvePolygon<Curve> readCurvePolygon(boolean hasZ, boolean hasM)
+			throws IOException {
+		GeometryFilter filter = null;
+		return readCurvePolygon(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Curve Polygon
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return curve polygon
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public CurvePolygon<Curve> readCurvePolygon(GeometryFilter filter,
+			boolean hasZ, boolean hasM) throws IOException {
+
+		CurvePolygon<Curve> curvePolygon = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			curvePolygon = new CurvePolygon<Curve>(hasZ, hasM);
+
+			do {
+				Curve ring = null;
+				if (isLeftParenthesisOrEmpty(reader)) {
+					ring = readLineString(filter, hasZ, hasM);
+					if (!filter(filter, GeometryType.CURVEPOLYGON, ring)) {
+						ring = null;
+					}
+				} else {
+					ring = read(filter, GeometryType.CURVEPOLYGON, Curve.class);
+				}
+				if (ring != null) {
+					curvePolygon.addRing(ring);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return curvePolygon;
+	}
+
+	/**
+	 * Read a Polyhedral Surface
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return polyhedral surface
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public PolyhedralSurface readPolyhedralSurface(boolean hasZ, boolean hasM)
+			throws IOException {
+		GeometryFilter filter = null;
+		return readPolyhedralSurface(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Polyhedral Surface
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return polyhedral surface
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public PolyhedralSurface readPolyhedralSurface(GeometryFilter filter,
+			boolean hasZ, boolean hasM) throws IOException {
+
+		PolyhedralSurface polyhedralSurface = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			polyhedralSurface = new PolyhedralSurface(hasZ, hasM);
+
+			do {
+				Polygon polygon = readPolygon(filter, hasZ, hasM);
+				if (filter(filter, GeometryType.POLYHEDRALSURFACE, polygon)) {
+					polyhedralSurface.addPolygon(polygon);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return polyhedralSurface;
+	}
+
+	/**
+	 * Read a TIN
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return TIN
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public TIN readTIN(boolean hasZ, boolean hasM) throws IOException {
+		GeometryFilter filter = null;
+		return readTIN(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a TIN
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return TIN
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public TIN readTIN(GeometryFilter filter, boolean hasZ, boolean hasM)
+			throws IOException {
+
+		TIN tin = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			tin = new TIN(hasZ, hasM);
+
+			do {
+				Polygon polygon = readPolygon(filter, hasZ, hasM);
+				if (filter(filter, GeometryType.TIN, polygon)) {
+					tin.addPolygon(polygon);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return tin;
+	}
+
+	/**
+	 * Read a Triangle
+	 * 
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return triangle
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public Triangle readTriangle(boolean hasZ, boolean hasM)
+			throws IOException {
+		GeometryFilter filter = null;
+		return readTriangle(filter, hasZ, hasM);
+	}
+
+	/**
+	 * Read a Triangle
+	 * 
+	 * @param filter
+	 *            geometry filter
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return triangle
+	 * @throws IOException
+	 *             upon failure to read
+	 * @since 1.0.1
+	 */
+	public Triangle readTriangle(GeometryFilter filter, boolean hasZ,
+			boolean hasM) throws IOException {
+
+		Triangle triangle = null;
+
+		if (leftParenthesisOrEmpty(reader)) {
+
+			triangle = new Triangle(hasZ, hasM);
+
+			do {
+				LineString ring = readLineString(filter, hasZ, hasM);
+				if (filter(filter, GeometryType.TRIANGLE, ring)) {
+					triangle.addRing(ring);
+				}
+			} while (commaOrRightParenthesis(reader));
+
+		}
+
+		return triangle;
+	}
+
+	/**
+	 * Read a geometry from the well-known text
+	 * 
+	 * @param reader
+	 *            text reader
+	 * @return geometry
+	 * @throws IOException
+	 *             upon failure to read
+	 */
+	public static Geometry readGeometry(TextReader reader) throws IOException {
+		return readGeometry(reader, null, null);
+	}
+
+	/**
+	 * Read a geometry from the well-known text
+	 * 
+	 * @param reader
+	 *            text reader
+	 * @param filter
+	 *            geometry filter
+	 * @return geometry
+	 * @throws IOException
+	 *             upon failure to read
+	 */
+	public static Geometry readGeometry(TextReader reader,
+			GeometryFilter filter) throws IOException {
+		return readGeometry(reader, filter, null);
+	}
+
+	/**
+	 * Read a geometry from the well-known text
+	 * 
+	 * @param reader
+	 *            text reader
+	 * @param expectedType
+	 *            expected type
+	 * @param <T>
+	 *            geometry type
+	 * @return geometry
+	 * @throws IOException
+	 *             upon failure to read
+	 */
+	public static <T extends Geometry> T readGeometry(TextReader reader,
+			Class<T> expectedType) throws IOException {
+		return readGeometry(reader, null, expectedType);
+	}
+
+	/**
+	 * Read a geometry from the well-known text
+	 * 
+	 * @param reader
+	 *            text reader
+	 * @param filter
+	 *            geometry filter
+	 * @param expectedType
+	 *            expected type
+	 * @param <T>
+	 *            geometry type
+	 * @return geometry
+	 * @throws IOException
+	 *             upon failure to read
+	 */
+	public static <T extends Geometry> T readGeometry(TextReader reader,
+			GeometryFilter filter, Class<T> expectedType) throws IOException {
+		return readGeometry(reader, filter, null, expectedType);
+	}
+
+	/**
+	 * Read a geometry from the well-known text
+	 * 
+	 * @param reader
+	 *            text reader
+	 * @param filter
+	 *            geometry filter
+	 * @param containingType
+	 *            containing geometry type
+	 * @param expectedType
+	 *            expected type
+	 * @param <T>
+	 *            geometry type
+	 * @return geometry
+	 * @throws IOException
+	 *             upon failure to read
+	 */
+	public static <T extends Geometry> T readGeometry(TextReader reader,
+			GeometryFilter filter, GeometryType containingType,
+			Class<T> expectedType) throws IOException {
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.read(filter, containingType, expectedType);
+	}
+
+	/**
+	 * Read the geometry type info
+	 * 
+	 * @param reader
+	 *            text reader
+	 * @return geometry type info
+	 * @throws IOException
+	 *             upon failure to read
+	 */
+	public static GeometryTypeInfo readGeometryType(TextReader reader)
+			throws IOException {
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readGeometryType();
+	}
+
+	/**
+	 * Read a Point
+	 * 
+	 * @param reader
+	 *            text reader
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return point
+	 * @throws IOException
+	 *             upon failure to read
+	 */
+	public static Point readPointText(TextReader reader, boolean hasZ,
+			boolean hasM) throws IOException {
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readPointText(hasZ, hasM);
+	}
+
+	/**
+	 * Read a Point
+	 * 
+	 * @param reader
+	 *            text reader
+	 * @param hasZ
+	 *            has z flag
+	 * @param hasM
+	 *            has m flag
+	 * @return point
+	 * @throws IOException
+	 *             upon failure to read
+	 */
+	public static Point readPoint(TextReader reader, boolean hasZ, boolean hasM)
+			throws IOException {
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readPoint(hasZ, hasM);
+	}
+
+	/**
+	 * Read a Line String
+	 * 
 	 * @param reader
 	 *            text reader
 	 * @param hasZ
@@ -480,7 +1401,8 @@ public class GeometryReader {
 	 */
 	public static LineString readLineString(TextReader reader, boolean hasZ,
 			boolean hasM) throws IOException {
-		return readLineString(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readLineString(hasZ, hasM);
 	}
 
 	/**
@@ -501,23 +1423,8 @@ public class GeometryReader {
 	public static LineString readLineString(TextReader reader,
 			GeometryFilter filter, boolean hasZ, boolean hasM)
 			throws IOException {
-
-		LineString lineString = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			lineString = new LineString(hasZ, hasM);
-
-			do {
-				Point point = readPoint(reader, hasZ, hasM);
-				if (filter(filter, GeometryType.LINESTRING, point)) {
-					lineString.addPoint(point);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return lineString;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readLineString(filter, hasZ, hasM);
 	}
 
 	/**
@@ -535,7 +1442,8 @@ public class GeometryReader {
 	 */
 	public static Polygon readPolygon(TextReader reader, boolean hasZ,
 			boolean hasM) throws IOException {
-		return readPolygon(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readPolygon(hasZ, hasM);
 	}
 
 	/**
@@ -555,23 +1463,8 @@ public class GeometryReader {
 	 */
 	public static Polygon readPolygon(TextReader reader, GeometryFilter filter,
 			boolean hasZ, boolean hasM) throws IOException {
-
-		Polygon polygon = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			polygon = new Polygon(hasZ, hasM);
-
-			do {
-				LineString ring = readLineString(reader, filter, hasZ, hasM);
-				if (filter(filter, GeometryType.POLYGON, ring)) {
-					polygon.addRing(ring);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return polygon;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readPolygon(filter, hasZ, hasM);
 	}
 
 	/**
@@ -589,7 +1482,8 @@ public class GeometryReader {
 	 */
 	public static MultiPoint readMultiPoint(TextReader reader, boolean hasZ,
 			boolean hasM) throws IOException {
-		return readMultiPoint(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readMultiPoint(hasZ, hasM);
 	}
 
 	/**
@@ -610,28 +1504,8 @@ public class GeometryReader {
 	public static MultiPoint readMultiPoint(TextReader reader,
 			GeometryFilter filter, boolean hasZ, boolean hasM)
 			throws IOException {
-
-		MultiPoint multiPoint = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			multiPoint = new MultiPoint(hasZ, hasM);
-
-			do {
-				Point point = null;
-				if (isLeftParenthesisOrEmpty(reader)) {
-					point = readPointText(reader, hasZ, hasM);
-				} else {
-					point = readPoint(reader, hasZ, hasM);
-				}
-				if (filter(filter, GeometryType.MULTIPOINT, point)) {
-					multiPoint.addPoint(point);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return multiPoint;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readMultiPoint(filter, hasZ, hasM);
 	}
 
 	/**
@@ -649,7 +1523,8 @@ public class GeometryReader {
 	 */
 	public static MultiLineString readMultiLineString(TextReader reader,
 			boolean hasZ, boolean hasM) throws IOException {
-		return readMultiLineString(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readMultiLineString(hasZ, hasM);
 	}
 
 	/**
@@ -670,24 +1545,8 @@ public class GeometryReader {
 	public static MultiLineString readMultiLineString(TextReader reader,
 			GeometryFilter filter, boolean hasZ, boolean hasM)
 			throws IOException {
-
-		MultiLineString multiLineString = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			multiLineString = new MultiLineString(hasZ, hasM);
-
-			do {
-				LineString lineString = readLineString(reader, filter, hasZ,
-						hasM);
-				if (filter(filter, GeometryType.MULTILINESTRING, lineString)) {
-					multiLineString.addLineString(lineString);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return multiLineString;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readMultiLineString(filter, hasZ, hasM);
 	}
 
 	/**
@@ -705,7 +1564,8 @@ public class GeometryReader {
 	 */
 	public static MultiPolygon readMultiPolygon(TextReader reader, boolean hasZ,
 			boolean hasM) throws IOException {
-		return readMultiPolygon(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readMultiPolygon(hasZ, hasM);
 	}
 
 	/**
@@ -726,23 +1586,8 @@ public class GeometryReader {
 	public static MultiPolygon readMultiPolygon(TextReader reader,
 			GeometryFilter filter, boolean hasZ, boolean hasM)
 			throws IOException {
-
-		MultiPolygon multiPolygon = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			multiPolygon = new MultiPolygon(hasZ, hasM);
-
-			do {
-				Polygon polygon = readPolygon(reader, filter, hasZ, hasM);
-				if (filter(filter, GeometryType.MULTIPOLYGON, polygon)) {
-					multiPolygon.addPolygon(polygon);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return multiPolygon;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readMultiPolygon(filter, hasZ, hasM);
 	}
 
 	/**
@@ -760,7 +1605,8 @@ public class GeometryReader {
 	 */
 	public static GeometryCollection<Geometry> readGeometryCollection(
 			TextReader reader, boolean hasZ, boolean hasM) throws IOException {
-		return readGeometryCollection(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readGeometryCollection(hasZ, hasM);
 	}
 
 	/**
@@ -781,24 +1627,8 @@ public class GeometryReader {
 	public static GeometryCollection<Geometry> readGeometryCollection(
 			TextReader reader, GeometryFilter filter, boolean hasZ,
 			boolean hasM) throws IOException {
-
-		GeometryCollection<Geometry> geometryCollection = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			geometryCollection = new GeometryCollection<Geometry>(hasZ, hasM);
-
-			do {
-				Geometry geometry = readGeometry(reader, filter,
-						GeometryType.GEOMETRYCOLLECTION, Geometry.class);
-				if (geometry != null) {
-					geometryCollection.addGeometry(geometry);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return geometryCollection;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readGeometryCollection(filter, hasZ, hasM);
 	}
 
 	/**
@@ -819,32 +1649,8 @@ public class GeometryReader {
 	public static GeometryCollection<Curve> readMultiCurve(TextReader reader,
 			GeometryFilter filter, boolean hasZ, boolean hasM)
 			throws IOException {
-
-		GeometryCollection<Curve> multiCurve = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			multiCurve = new GeometryCollection<Curve>(hasZ, hasM);
-
-			do {
-				Curve curve = null;
-				if (isLeftParenthesisOrEmpty(reader)) {
-					curve = readLineString(reader, filter, hasZ, hasM);
-					if (!filter(filter, GeometryType.MULTICURVE, curve)) {
-						curve = null;
-					}
-				} else {
-					curve = readGeometry(reader, filter,
-							GeometryType.MULTICURVE, Curve.class);
-				}
-				if (curve != null) {
-					multiCurve.addGeometry(curve);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return multiCurve;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readMultiCurve(filter, hasZ, hasM);
 	}
 
 	/**
@@ -865,32 +1671,8 @@ public class GeometryReader {
 	public static GeometryCollection<Surface> readMultiSurface(
 			TextReader reader, GeometryFilter filter, boolean hasZ,
 			boolean hasM) throws IOException {
-
-		GeometryCollection<Surface> multiSurface = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			multiSurface = new GeometryCollection<Surface>(hasZ, hasM);
-
-			do {
-				Surface surface = null;
-				if (isLeftParenthesisOrEmpty(reader)) {
-					surface = readPolygon(reader, filter, hasZ, hasM);
-					if (!filter(filter, GeometryType.MULTISURFACE, surface)) {
-						surface = null;
-					}
-				} else {
-					surface = readGeometry(reader, filter,
-							GeometryType.MULTISURFACE, Surface.class);
-				}
-				if (surface != null) {
-					multiSurface.addGeometry(surface);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return multiSurface;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readMultiSurface(filter, hasZ, hasM);
 	}
 
 	/**
@@ -908,7 +1690,8 @@ public class GeometryReader {
 	 */
 	public static CircularString readCircularString(TextReader reader,
 			boolean hasZ, boolean hasM) throws IOException {
-		return readCircularString(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readCircularString(hasZ, hasM);
 	}
 
 	/**
@@ -929,23 +1712,8 @@ public class GeometryReader {
 	public static CircularString readCircularString(TextReader reader,
 			GeometryFilter filter, boolean hasZ, boolean hasM)
 			throws IOException {
-
-		CircularString circularString = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			circularString = new CircularString(hasZ, hasM);
-
-			do {
-				Point point = readPoint(reader, hasZ, hasM);
-				if (filter(filter, GeometryType.CIRCULARSTRING, point)) {
-					circularString.addPoint(point);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return circularString;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readCircularString(filter, hasZ, hasM);
 	}
 
 	/**
@@ -963,7 +1731,8 @@ public class GeometryReader {
 	 */
 	public static CompoundCurve readCompoundCurve(TextReader reader,
 			boolean hasZ, boolean hasM) throws IOException {
-		return readCompoundCurve(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readCompoundCurve(hasZ, hasM);
 	}
 
 	/**
@@ -984,33 +1753,8 @@ public class GeometryReader {
 	public static CompoundCurve readCompoundCurve(TextReader reader,
 			GeometryFilter filter, boolean hasZ, boolean hasM)
 			throws IOException {
-
-		CompoundCurve compoundCurve = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			compoundCurve = new CompoundCurve(hasZ, hasM);
-
-			do {
-				LineString lineString = null;
-				if (isLeftParenthesisOrEmpty(reader)) {
-					lineString = readLineString(reader, filter, hasZ, hasM);
-					if (!filter(filter, GeometryType.COMPOUNDCURVE,
-							lineString)) {
-						lineString = null;
-					}
-				} else {
-					lineString = readGeometry(reader, filter,
-							GeometryType.COMPOUNDCURVE, LineString.class);
-				}
-				if (lineString != null) {
-					compoundCurve.addLineString(lineString);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return compoundCurve;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readCompoundCurve(filter, hasZ, hasM);
 	}
 
 	/**
@@ -1028,7 +1772,8 @@ public class GeometryReader {
 	 */
 	public static CurvePolygon<Curve> readCurvePolygon(TextReader reader,
 			boolean hasZ, boolean hasM) throws IOException {
-		return readCurvePolygon(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readCurvePolygon(hasZ, hasM);
 	}
 
 	/**
@@ -1049,32 +1794,8 @@ public class GeometryReader {
 	public static CurvePolygon<Curve> readCurvePolygon(TextReader reader,
 			GeometryFilter filter, boolean hasZ, boolean hasM)
 			throws IOException {
-
-		CurvePolygon<Curve> curvePolygon = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			curvePolygon = new CurvePolygon<Curve>(hasZ, hasM);
-
-			do {
-				Curve ring = null;
-				if (isLeftParenthesisOrEmpty(reader)) {
-					ring = readLineString(reader, filter, hasZ, hasM);
-					if (!filter(filter, GeometryType.CURVEPOLYGON, ring)) {
-						ring = null;
-					}
-				} else {
-					ring = readGeometry(reader, filter,
-							GeometryType.CURVEPOLYGON, Curve.class);
-				}
-				if (ring != null) {
-					curvePolygon.addRing(ring);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return curvePolygon;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readCurvePolygon(filter, hasZ, hasM);
 	}
 
 	/**
@@ -1092,7 +1813,8 @@ public class GeometryReader {
 	 */
 	public static PolyhedralSurface readPolyhedralSurface(TextReader reader,
 			boolean hasZ, boolean hasM) throws IOException {
-		return readPolyhedralSurface(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readPolyhedralSurface(hasZ, hasM);
 	}
 
 	/**
@@ -1113,23 +1835,8 @@ public class GeometryReader {
 	public static PolyhedralSurface readPolyhedralSurface(TextReader reader,
 			GeometryFilter filter, boolean hasZ, boolean hasM)
 			throws IOException {
-
-		PolyhedralSurface polyhedralSurface = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			polyhedralSurface = new PolyhedralSurface(hasZ, hasM);
-
-			do {
-				Polygon polygon = readPolygon(reader, filter, hasZ, hasM);
-				if (filter(filter, GeometryType.POLYHEDRALSURFACE, polygon)) {
-					polyhedralSurface.addPolygon(polygon);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return polyhedralSurface;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readPolyhedralSurface(filter, hasZ, hasM);
 	}
 
 	/**
@@ -1147,7 +1854,8 @@ public class GeometryReader {
 	 */
 	public static TIN readTIN(TextReader reader, boolean hasZ, boolean hasM)
 			throws IOException {
-		return readTIN(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readTIN(hasZ, hasM);
 	}
 
 	/**
@@ -1167,23 +1875,8 @@ public class GeometryReader {
 	 */
 	public static TIN readTIN(TextReader reader, GeometryFilter filter,
 			boolean hasZ, boolean hasM) throws IOException {
-
-		TIN tin = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			tin = new TIN(hasZ, hasM);
-
-			do {
-				Polygon polygon = readPolygon(reader, filter, hasZ, hasM);
-				if (filter(filter, GeometryType.TIN, polygon)) {
-					tin.addPolygon(polygon);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return tin;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readTIN(filter, hasZ, hasM);
 	}
 
 	/**
@@ -1201,7 +1894,8 @@ public class GeometryReader {
 	 */
 	public static Triangle readTriangle(TextReader reader, boolean hasZ,
 			boolean hasM) throws IOException {
-		return readTriangle(reader, null, hasZ, hasM);
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readTriangle(hasZ, hasM);
 	}
 
 	/**
@@ -1222,23 +1916,8 @@ public class GeometryReader {
 	public static Triangle readTriangle(TextReader reader,
 			GeometryFilter filter, boolean hasZ, boolean hasM)
 			throws IOException {
-
-		Triangle triangle = null;
-
-		if (leftParenthesisOrEmpty(reader)) {
-
-			triangle = new Triangle(hasZ, hasM);
-
-			do {
-				LineString ring = readLineString(reader, filter, hasZ, hasM);
-				if (filter(filter, GeometryType.TRIANGLE, ring)) {
-					triangle.addRing(ring);
-				}
-			} while (commaOrRightParenthesis(reader));
-
-		}
-
-		return triangle;
+		GeometryReader geometryReader = new GeometryReader(reader);
+		return geometryReader.readTriangle(filter, hasZ, hasM);
 	}
 
 	/**
