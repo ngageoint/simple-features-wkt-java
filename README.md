@@ -40,21 +40,21 @@ String text = GeometryWriter.writeGeometry(geometry);
 
 ### Installation ###
 
-Pull from the [Maven Central Repository](http://search.maven.org/#artifactdetails|mil.nga.sf|sf-wkt|1.0.0|jar) (JAR, POM, Source, Javadoc)
+Pull from the [Maven Central Repository](http://search.maven.org/#artifactdetails|mil.nga.sf|sf-wkt|1.0.1|jar) (JAR, POM, Source, Javadoc)
 
 ```xml
 
 <dependency>
     <groupId>mil.nga.sf</groupId>
     <artifactId>sf-wkt</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 
 ```
 
 ### Build ###
 
-[![Build & Test](https://github.com/ngageoint/simple-features-wkt-java/workflows/Build%20&%20Test/badge.svg)](https://github.com/ngageoint/simple-features-wkt-java/actions?query=workflow%3A%22Build+%26+Test%22)
+[![Build & Test](https://github.com/ngageoint/simple-features-wkt-java/workflows/Build%20&%20Test/badge.svg)](https://github.com/ngageoint/simple-features-wkt-java/actions/workflows/build-test.yml)
 
 Build this repository using Eclipse and/or Maven:
 
