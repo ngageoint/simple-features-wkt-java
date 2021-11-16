@@ -1,4 +1,4 @@
-package mil.nga.sf.wkt.test;
+package mil.nga.sf.wkt;
 
 import java.io.IOException;
 import java.util.ArrayList;
