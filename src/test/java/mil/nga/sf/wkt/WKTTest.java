@@ -21,7 +21,6 @@ import mil.nga.sf.Point;
 import mil.nga.sf.Polygon;
 import mil.nga.sf.Surface;
 import mil.nga.sf.extended.ExtendedGeometryCollection;
-import mil.nga.sf.util.GeometryEnvelopeBuilder;
 import mil.nga.sf.util.filter.FiniteFilterType;
 import mil.nga.sf.util.filter.PointFiniteFilter;
 
@@ -783,10 +782,8 @@ public class WKTTest {
 
 		WKTTestUtils.compareGeometries(compareGeometry, geometryFromText);
 
-		GeometryEnvelope envelope = GeometryEnvelopeBuilder
-				.buildEnvelope(compareGeometry);
-		GeometryEnvelope envelopeFromText = GeometryEnvelopeBuilder
-				.buildEnvelope(geometryFromText);
+		GeometryEnvelope envelope = compareGeometry.getEnvelope();
+		GeometryEnvelope envelopeFromText = geometryFromText.getEnvelope();
 
 		WKTTestUtils.compareEnvelopes(envelope, envelopeFromText);
 	}
