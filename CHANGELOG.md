@@ -4,9 +4,9 @@ Adheres to [Semantic Versioning](http://semver.org/).
 
 ---
 
-## 1.2.0 (TBD)
+## [1.2.0](https://github.com/ngageoint/geopackage-wkt-java/releases/tag/1.2.0) (09-21-2022)
 
-* TBD
+* simple-features-java version 2.2.0
 
 ## [1.1.0](https://github.com/ngageoint/geopackage-wkt-java/releases/tag/1.1.0) (07-11-2022)
 
