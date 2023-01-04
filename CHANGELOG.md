@@ -6,7 +6,7 @@ Adheres to [Semantic Versioning](http://semver.org/).
 
 ## 1.2.1 (TBD)
 
-* TBD
+* MultiLineString with CircularStrings text encoding fix to use MultiCurve and CircularStrings
 
 ## [1.2.0](https://github.com/ngageoint/geopackage-wkt-java/releases/tag/1.2.0) (09-21-2022)
 

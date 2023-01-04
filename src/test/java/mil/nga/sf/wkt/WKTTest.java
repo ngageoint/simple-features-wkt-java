@@ -135,6 +135,33 @@ public class WKTTest {
 	}
 
 	/**
+	 * Test a multi line string with circular strings
+	 * 
+	 * @throws IOException
+	 *             upon error
+	 */
+	@Test
+	public void testMultiLineStringWithCircularStrings() throws IOException {
+
+		for (int i = 0; i < GEOMETRIES_PER_TEST; i++) {
+
+			MultiLineString multiLineString = WKTTestUtils
+					.createMultiLineStringWithCircularStrings(
+							WKTTestUtils.coinFlip(), WKTTestUtils.coinFlip());
+
+			String text = WKTTestUtils.writeText(multiLineString);
+
+			GeometryCollection<LineString> geometry = new GeometryCollection<>();
+			geometry.addGeometries(multiLineString.getGeometries());
+
+			Geometry geometry2 = WKTTestUtils.readGeometry(text);
+
+			geometryTester(geometry, geometry2);
+		}
+
+	}
+
+	/**
 	 * Test a multi curve with line strings
 	 * 
 	 * @throws IOException

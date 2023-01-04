@@ -114,10 +114,10 @@ public class GeometryWriter {
 	 */
 	public void write(Geometry geometry) throws IOException {
 
-		GeometryType geometryType = geometry.getGeometryType();
+		String name = getName(geometry);
 
 		// Write the geometry type
-		writer.write(geometryType.name());
+		writer.write(name);
 		writer.write(" ");
 
 		boolean hasZ = geometry.hasZ();
@@ -132,6 +132,8 @@ public class GeometryWriter {
 			}
 			writer.write(" ");
 		}
+
+		GeometryType geometryType = geometry.getGeometryType();
 
 		switch (geometryType) {
 
@@ -190,6 +192,30 @@ public class GeometryWriter {
 					"Geometry Type not supported: " + geometryType);
 		}
 
+	}
+
+	/**
+	 * Get the well-known text writable geometry name
+	 * 
+	 * @param geometry
+	 *            geometry
+	 * @return geometry name
+	 */
+	public static String getName(Geometry geometry) {
+		GeometryType type = geometry.getGeometryType();
+		if (!geometry.isEmpty()) {
+			switch (type) {
+			case MULTILINESTRING:
+				LineString lineString = ((MultiLineString) geometry)
+						.getLineString(0);
+				if (lineString instanceof CircularString) {
+					type = GeometryType.MULTICURVE;
+				}
+				break;
+			default:
+			}
+		}
+		return type.name();
 	}
 
 	/**
@@ -374,7 +400,12 @@ public class GeometryWriter {
 				if (i > 0) {
 					writer.write(", ");
 				}
-				writeLineString(multiLineString.getLineString(i));
+				LineString lineString = multiLineString.getLineString(i);
+				if (lineString instanceof CircularString) {
+					write(lineString);
+				} else {
+					writeLineString(lineString);
+				}
 			}
 
 			writer.write(")");
