@@ -40,14 +40,14 @@ String text = GeometryWriter.writeGeometry(geometry);
 
 ### Installation ###
 
-Pull from the [Maven Central Repository](http://search.maven.org/#artifactdetails|mil.nga.sf|sf-wkt|1.2.2|jar) (JAR, POM, Source, Javadoc)
+Pull from the [Maven Central Repository](http://search.maven.org/#artifactdetails|mil.nga.sf|sf-wkt|1.2.3|jar) (JAR, POM, Source, Javadoc)
 
 ```xml
 
 <dependency>
     <groupId>mil.nga.sf</groupId>
     <artifactId>sf-wkt</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
 </dependency>
 
 ```
